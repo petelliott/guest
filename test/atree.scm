@@ -11,12 +11,12 @@
 
 (define-test (guest atree atree-ref)
   (equal? (atree-ref '() '(a)) #f)
-  ;(equal? (atree-ref '() '(a) #t) #t)) ;TODO fix
+  (equal? (atree-ref '() '(a) #t) #t)
   (equal? (atree-ref '((a (b . 5) (c . 6))) '(a b)) 5)
   (equal? (atree-ref '((a (b . 5) (c . 6))) '(a c)) 6)
   (equal? (atree-ref '((a (b . 5) (c . 6))) '(a e)) #f)
-  (equal? (atree-ref '((a (b . 5) (c . 6)) (b (c . 3) (d . 4))) '(b c)) 3))
-  ;(equal? (atree-ref '((a (b . 5) (c . 6)) (b (c . 3) (d . 4))) '(b e) #t) #t)) TODO
+  (equal? (atree-ref '((a (b . 5) (c . 6)) (b (c . 3) (d . 4))) '(b c)) 3)
+  (equal? (atree-ref '((a (b . 5) (c . 6)) (b (c . 3) (d . 4))) '(b e) #t) #t))
 
 (define-test (guest atree atree-sort)
   (equal? (atree-sort '()) '())

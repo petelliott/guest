@@ -21,8 +21,8 @@
 (define* (atree-ref atree key #:optional dflt)
   "find the value pointed to by key, with optional default"
   (cond
-    ((null? key) atree)
     ((not atree) dflt)
+    ((null? key) atree)
     (#t (atree-ref (assoc-ref atree (car key))
                    (cdr key) dflt))))
 
