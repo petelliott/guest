@@ -1,0 +1,20 @@
+#! /usr/bin/guile -s
+!#
+(use-modules (ice-9 ftw)
+             (ice-9 regex)
+             (guest test)
+             (guest printer)
+             (srfi srfi-1))
+
+(define (tests-passed ret)
+  (= (car ret)
+     (cdr ret)))
+
+(ftw (second (command-line))
+     (lambda (filename statinfo flag)
+       (when (and (eq? flag 'regular)
+                  (string-match ".scm$" filename))
+         (load filename))))
+
+
+(exit (tests-passed (run-guest default-printer)))
