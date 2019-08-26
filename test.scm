@@ -16,18 +16,15 @@
 
 (define-syntax-rule
   (return-fail tcase)
-  (catch #t
-    (lambda ()
-      (if tcase
-        #f
-        (cons #:fail (quote tcase))))
-    ; post-unwind handler
-    (lambda (key . args)
-      (quote tcase))
-    ; pre-unwind handler
-    (lambda (key . args)
-      (display-error #f (current-output-port)
-                     (car args) (cadr args) (caddr args) #f))))
+  (let ((errorm #f))
+    (catch #t
+      (lambda ()
+        (if tcase
+          #f
+          (cons #f (quote tcase))))
+      ; post-unwind handler
+      (lambda (key . args)
+        (cons args (quote tcase))))))
 
 
 (define* (run-guest #:optional (printer null-printer))
@@ -42,16 +39,18 @@
       (lambda (pair1 pair2)
         (cons
           (+ (car pair1) (car pair2))
-          (+ (cdr pair1) (car pair2))))
+          (+ (cdr pair1) (cdr pair2))))
 
       '(0 . 0)
 
       (map (lambda (test)
              (let ((newpre (append prefix (list (car test)))))
-               (printer #:before (car test) newpre)
+               (when (list? (cdr test)) (printer #:before (car test) newpre))
                (let ((ret (run-guest-sorted (cdr test) printer newpre)))
-                 (printer #:after (car test) (append prefix (car test))
-                          0 (car ret) (cdr ret))
+                 (when (list? (cdr test))
+                   (printer #:after (car test) newpre
+                            0 (suite-fail (car ret) (cdr ret))
+                            (car ret) (cdr ret)))
                  ret)))
            tests))
     (transform-single-test
@@ -65,18 +64,23 @@
       ((#:pass) 1)
       ((#:fail) 0))))
 
+(define (suite-fail ntests passed)
+  (if (= ntests passed)
+    #:pass
+    #:fail))
+
 (define* (run-guest-test name fullname test #:optional printer)
   "run and test and print printer output returns (#:pass/#:fail . msg)"
   (let* ((msg (test))
          (pf (if msg #:fail #:pass)))
-    (printer #:leaf name fullname 0 pf msg)
+    (printer #:leaf name fullname 0 pf (if msg (cdr msg) msg) (if msg (car msg) #f))
     (cons pf msg)))
 
 ;;; printers take a key, whigh is either #:before #:after of #:leaf
 ;;; with the following args:
 ;;; #:before: (name fullname)
-;;; #:after: (name fullname time status percent)
-;;; #:leaf:  (name fullname time status msg)
+;;; #:after: (name fullname time status ntests passed)
+;;; #:leaf:  (name fullname time status msg error)
 ;;;
 ;;; status can be #:pass/#:fail
 ;;; in the future there might be #:stillfail
@@ -84,4 +88,3 @@
 (define (null-printer key . args)
   "the guest printer that does nothing"
   #f)
-
