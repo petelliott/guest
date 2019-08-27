@@ -1,5 +1,7 @@
 # guest
 
+[![Build Status](https://travis-ci.com/Petelliott/guest.svg?branch=master)](https://travis-ci.com/Petelliott/guest)
+
 guest is a testing framework for GNU guile. It is licensed under the LGPLv3
 
 ## installation
