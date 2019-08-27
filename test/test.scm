@@ -1,4 +1,5 @@
-(use-modules (guest test))
+(use-modules (guest test)
+             (guest atree))
 
 ;; run the statements of body* with and empty *guest-tests*
 ;; and then restores afterwards.
