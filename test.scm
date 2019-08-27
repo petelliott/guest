@@ -69,7 +69,7 @@
     #:pass
     #:fail))
 
-(define* (run-guest-test name fullname test #:optional printer)
+(define* (run-guest-test name fullname test #:optional (printer null-printer))
   "run and test and print printer output returns (#:pass/#:fail . msg)"
   (let* ((msg (test))
          (pf (if msg #:fail #:pass)))
