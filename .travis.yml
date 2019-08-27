@@ -1,0 +1,8 @@
+language: minimal
+
+
+install:
+  - sudo apt install guile-2.2 -y
+
+script:
+  - guile -L .. -s guest test/
