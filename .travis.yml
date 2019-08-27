@@ -2,6 +2,7 @@ language: minimal
 
 
 install:
+  - sudo apt update
   - sudo apt install guile-2.0 -y
 
 script:
