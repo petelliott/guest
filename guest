@@ -2,19 +2,74 @@
 !#
 (use-modules (ice-9 ftw)
              (ice-9 regex)
+             (ice-9 getopt-long)
              (guest test)
              (guest printer)
-             (srfi srfi-1))
+             (srfi srfi-1)
+             (srfi srfi-11)
+             (sxml fold)
+             ((system vm coverage)
+              #:select (with-code-coverage instrumented/executed-lines line-execution-counts))
+             (guest coverage))
 
 (define (tests-passed ret)
   (= (car ret)
      (cdr ret)))
 
-(ftw (second (command-line))
-     (lambda (filename statinfo flag)
-       (when (and (eq? flag 'regular)
-                  (string-match ".scm$" filename))
-         (load filename))
-       #t))
+(define (tokenize str)
+  (if (string? str)
+    (delete "" (string-split str char-set:whitespace))
+    str))
 
-(exit (tests-passed (run-guest default-printer)))
+(define (coverage-ratio data files)
+  (let ((ret (fold
+               (lambda (file counts)
+                 (let-values (((i x) (instrumented/executed-lines data file)))
+                   (write (list i x))
+                   (newline)
+                   (cons
+                     (+ i (car counts))
+                     (+ x (cdr counts)))))
+               '(0 . 0)
+               files)))
+    (/ (cdr ret) (car ret))))
+
+(define args (getopt-long (command-line)
+                          `((cover     (single-char #\c) (value #t))
+                            (cover-out (single-char #\o) (value #t)))))
+
+
+(define cover (tokenize (assoc-ref args 'cover)))
+(define tests (tokenize (assoc-ref args '())))
+(define cover-out (assoc-ref args 'cover-out))
+
+(for-each
+  (lambda (test)
+    (ftw test
+      (lambda (filename statinfo flag)
+        (when (and (eq? flag 'regular)
+                   (string-match ".scm$" filename))
+          (load filename))
+        #t)))
+  tests)
+
+(let-values (((data ret)
+              (with-code-coverage
+                (lambda ()
+                  (run-guest default-printer)))))
+  (when cover
+    (write (car cover))
+    (newline)
+    (write (line-execution-counts data (car cover)))
+    (newline)
+    (write (coverage-ratio data cover))
+    (newline)
+    (write (instrumented/executed-lines data (car cover)))
+    (newline)
+    (format #t "test coverage: ~$%~%"
+            50))
+  (when cover-out
+    (call-with-output-file cover-out
+      (lambda (port)
+        (coverage-data->lcov data port #:files cover))))
+  (exit (tests-passed ret)))
