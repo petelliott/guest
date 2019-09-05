@@ -1,6 +1,7 @@
 # guest
 
 [![Build Status](https://travis-ci.com/Petelliott/guest.svg?branch=master)](https://travis-ci.com/Petelliott/guest)
+[![Coverage Status](https://coveralls.io/repos/github/Petelliott/guest/badge.svg?branch=master)](https://coveralls.io/github/Petelliott/guest?branch=master)
 
 guest is a testing framework for GNU guile. It is licensed under the LGPLv3
 
