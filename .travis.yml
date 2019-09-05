@@ -1,10 +1,16 @@
 dist: bionic
-language: minimal
+language: generic
 
 
 install:
   - sudo apt update
-  - sudo apt install guile-2.2 -y
+  - sudo apt install -y guile-2.2 coveralls-lcov
+  - gem install coveralls-lcov
 
 script:
-  - guile -L .. -s guest test/
+  - > guile -L .. -s guest test/
+                  --cover \"$(printf \"guest/%s \" *.scm)\"
+                  --cover-out coverage.info
+
+after_success:
+  - coveralls-lcov --repo-token $COVERALLS_TOKEN coverage.info
