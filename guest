@@ -56,10 +56,12 @@
                (with-code-coverage
                  (lambda ()
                    (run-guest default-printer))))
-              ((cover) (filter
-                         (lambda (file)
-                           (line-execution-counts data file))
-                         cover)))
+              ((cover) (if cover
+                         (filter
+                           (lambda (file)
+                             (line-execution-counts data file))
+                           cover)
+                         #f)))
   (when cover
     (format #t "test coverage: ~$%\n"
             (* 100 (coverage-ratio data cover))))
