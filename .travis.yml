@@ -8,7 +8,8 @@ install:
   - gem install coveralls-lcov
 
 script:
-  - guile -L .. -s guest test/ --cover "$(printf "guest/%s " *.scm)" --cover-out coverage.info
+  - guile --debug -L .. -s guest test/ --cover "$(printf "guest/%s " *.scm)" --cover-out coverage.info
 
 after_success:
+  - lcov -a coverage.info -b . -o coverage.info
   - coveralls-lcov --repo-token $COVERALLS_TOKEN coverage.info
