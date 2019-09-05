@@ -1,9 +1,10 @@
+dist: bionic
 language: minimal
 
 
 install:
   - sudo apt update
-  - sudo apt install guile-2.0 -y
+  - sudo apt install guile-2.2 -y
 
 script:
   - guile -L .. -s guest test/
