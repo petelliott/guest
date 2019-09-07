@@ -12,3 +12,4 @@ SITEDIR=$(guile -c "(display (%site-dir))(newline)")
 # install guest
 sudo git clone --depth 1 https://github.com/Petelliott/guest.git $SITEDIR/guest
 sudo mv $SITEDIR/guest/guest /usr/bin/
+sudo mv $SITEDIR/guest/coveralls.sh /usr/bin/
