@@ -47,6 +47,28 @@ Testing a:
 suite a: ran 3, passed 1 (33.33%): fail
 ```
 
+### travis ci/coveralls example
+
+`.travis.yml`:
+
+```yaml
+dist: bionic
+language: generic
+
+install:
+  - curl https://raw.githubusercontent.com/Petelliott/guest/master/install.sh | bash
+  - export GUILE_LOAD_PATH=$(realpath ..)
+
+script:
+  - guest test/ --cover "$(printf "your-package/%s " *.scm)" --cover-out coverage.info
+
+
+after_success:
+  - coveralls.sh coverage.info
+```
+
+in your travis settings, be sure to set the `COVERALLS_TOKEN` environment variable.
+
 ## how it works
 
 The `define-test` macro takes a hierarchical test name, and a bunch of
