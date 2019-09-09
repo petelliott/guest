@@ -10,7 +10,7 @@
              (srfi srfi-11)
              (sxml fold)
              ((system vm coverage)
-              #:select (with-code-coverage instrumented/executed-lines line-execution-counts))
+              #:select (with-code-coverage instrumented-source-files instrumented/executed-lines line-execution-counts))
              (guest coverage))
 
 (define (tests-passed ret)
@@ -53,6 +53,9 @@
           #t)))
     tests))
 
+(write cover)
+(newline)
+
 (let*-values (((data ret)
                (with-code-coverage
                  (lambda ()
@@ -65,7 +68,11 @@
                            cover)
                          #f)))
   (when cover
+    (write (line-execution-counts data "schingle/query.scm"))
+    (newline)
     (write data)
+    (newline)
+    (write (instrumented-source-files data))
     (newline)
     (write cover)
     (newline)
