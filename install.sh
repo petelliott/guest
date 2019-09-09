@@ -4,7 +4,7 @@
 
 # install dependecies
 sudo apt update
-sudo apt install -y guile-2.2 lcov
+sudo apt install -y guile-2.2-dev lcov
 gem install coveralls-lcov
 
 SITEDIR=$(guile -c "(display (%site-dir))(newline)")
