@@ -42,19 +42,21 @@
 (define tests (tokenize (assoc-ref args '())))
 (define cover-out (assoc-ref args 'cover-out))
 
-(for-each
-  (lambda (test)
-    (ftw test
-      (lambda (filename statinfo flag)
-        (when (and (eq? flag 'regular)
-                   (string-match ".scm$" filename))
-          (load (string-append (getcwd) "/" filename)))
-        #t)))
-  tests)
+(define (load-tests tests)
+  (for-each
+    (lambda (test)
+      (ftw test
+        (lambda (filename statinfo flag)
+          (when (and (eq? flag 'regular)
+                     (string-match ".scm$" filename))
+            (load (string-append (getcwd) "/" filename)))
+          #t)))
+    tests))
 
 (let*-values (((data ret)
                (with-code-coverage
                  (lambda ()
+                   (load-tests tests)
                    (run-guest default-printer))))
               ((cover) (if cover
                          (filter
