@@ -26,8 +26,6 @@
   (let ((ret (fold
                (lambda (file counts)
                  (let-values (((i x) (instrumented/executed-lines data file)))
-                   (write (list i x file counts))
-                   (newline)
                    (cons
                      (+ i (car counts))
                      (+ x (cdr counts)))))
@@ -67,6 +65,10 @@
                            cover)
                          #f)))
   (when cover
+    (write data)
+    (newline)
+    (write cover)
+    (newline)
     (format #t "test coverage: ~$%\n"
             (* 100 (coverage-ratio data cover))))
   (when cover-out
