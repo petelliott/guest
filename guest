@@ -26,6 +26,8 @@
   (let ((ret (fold
                (lambda (file counts)
                  (let-values (((i x) (instrumented/executed-lines data file)))
+                   (write (list i x file counts))
+                   (newline)
                    (cons
                      (+ i (car counts))
                      (+ x (cdr counts)))))
