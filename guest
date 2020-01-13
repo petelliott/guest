@@ -53,13 +53,51 @@
           #t)))
     tests))
 
+(define (contains lst elem)
+  "true if elem in lst using equal?"
+  (cond
+    ((null? lst) #f)
+    ((equal? (car lst) elem) lst)
+    (#t (contains (cdr lst) elem))))
+
+(define (del-from-list dels lst)
+  "returns a new list without any element that is in dels"
+  (filter
+    (lambda (elem)
+      (not (contains dels elem)))
+    lst))
+
+(define old-mods (module-uses (current-module)))
+
 (load-tests tests)
+
+(define mods-to-reload
+  (map
+    resolve-module
+    (map
+      module-name
+      (del-from-list
+        old-mods
+        (module-uses (current-module))))))
+
+(write mods-to-reload)
+(newline)
+
+#;(define (reload-coverage files)
+  "reloads all files in 'files'"
+  (define last-module (current-module))
+  (for-each
+    load-from-path
+    files)
+  (set-current-module last-module))
 
 (let*-values (((data ret)
                (with-code-coverage
                  (lambda ()
                    ;TODO: figure out loading tests in coverage
                    #;(load-tests tests)
+                   ;(reload-coverage cover)
+                   ;(for-each reload-module mods-to-reload)
                    (run-guest default-printer))))
               ((cover) (if cover
                          (filter
