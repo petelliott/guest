@@ -10,14 +10,18 @@
 
 (define test-cont '())
 
-(define (assert-equal-internal? left right mleft mright)
+(define (assert-equal-internal? left right mleft mright cl)
  (unless (equal? left right)
-   (test-cont (cons #f (format #f "Left: ~A -> ~A != Right ~A -> ~A"
-                               mleft left mright right)))))
+   (test-cont (cons #f (format #f (string-append
+                                   "Left: ~A -> ~A != Right ~A -> ~A~%"
+                                   "On line ~A of ~A~%")
+                               mleft left mright right
+                               (cdr (assoc 'line cl))
+                               (cdr (assoc 'filename cl)))))))
 
 (define-syntax-rule
   (assert-equal? left right)
-  (assert-equal-internal? left right 'left 'right))
+  (assert-equal-internal? left right 'left 'right (current-source-location)))
 
 (define-syntax-rule
   (define-test name tcase* ...)
