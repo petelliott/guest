@@ -2,29 +2,44 @@
   #:use-module (guest atree)
   #:use-module (srfi srfi-1)
   #:export (define-test
+            assert-equal?
             run-guest
             run-guest-test))
 
 (define *guest-tests* '())
 
+(define test-cont '())
+
+(define (assert-equal-internal? left right mleft mright)
+ (unless (equal? left right)
+   (test-cont (cons #f (format #f "Left: ~A -> ~A != Right ~A -> ~A"
+                               mleft left mright right)))))
+
+(define-syntax-rule
+  (assert-equal? left right)
+  (assert-equal-internal? left right 'left 'right))
+
 (define-syntax-rule
   (define-test name tcase* ...)
   (set! *guest-tests*
     (atree-insert *guest-tests* (quote name)
-                  (lambda ()
-                    (or (return-fail tcase*) ...)))))
+                  (λ ()
+                    (call/cc
+                      (lambda (cont)
+                        (set! test-cont cont)
+                        (return-fail tcase*)
+                        ...
+                        #f))))))
 
 (define-syntax-rule
   (return-fail tcase)
   (let ((errorm #f))
     (catch #t
       (lambda ()
-        (if tcase
-          #f
-          (cons #f (quote tcase))))
+        tcase)
       ; post-unwind handler
       (lambda (key . args)
-        (cons args (quote tcase))))))
+        (test-cont (cons args (quote tcase)))))))
 
 
 (define* (run-guest #:optional (printer null-printer))

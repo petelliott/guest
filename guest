@@ -49,7 +49,7 @@
         (lambda (filename statinfo flag)
           (when (and (eq? flag 'regular)
                      (string-match ".scm$" filename))
-            (load (string-append (getcwd) "/" filename)))
+            (load filename))
           #t)))
     tests))
 
