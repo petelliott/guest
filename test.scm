@@ -24,7 +24,7 @@
 (define-syntax-rule
   (define-suite name rules* ...)
   (let ((copy suite-prefix))
-    (set! suite-prefix (append (quote name) suite-prefix))
+    (set! suite-prefix (append suite-prefix (quote name)))
     rules* ...
     (set! suite-prefix copy)))
 
@@ -41,8 +41,7 @@
                     (call/cc
                       (lambda (cont)
                         (set! test-cont cont)
-                        (return-fail tcase*)
-                        ...
+                        (return-fail tcase*) ...
                         #f))))))
 
 (define-syntax-rule
