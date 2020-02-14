@@ -2,6 +2,7 @@
   #:use-module (guest atree)
   #:use-module (srfi srfi-1)
   #:export (define-test
+            define-suite
             assert-equal?
             run-guest
             run-guest-test))
@@ -9,6 +10,8 @@
 (define *guest-tests* '())
 
 (define test-cont '())
+(define suite-prefix '())
+
 
 (define (assert-equal-internal? left right mleft mright cl)
  (unless (equal? left right)
@@ -18,6 +21,13 @@
                                mleft left mright right
                                (cdr (assoc 'line cl))
                                (cdr (assoc 'filename cl)))))))
+(define-syntax-rule
+  (define-suite name rules* ...)
+  (let ((copy suite-prefix))
+    (set! suite-prefix (append (quote name) suite-prefix))
+    rules* ...
+    (set! suite-prefix copy)))
+
 
 (define-syntax-rule
   (assert-equal? left right)
@@ -26,7 +36,7 @@
 (define-syntax-rule
   (define-test name tcase* ...)
   (set! *guest-tests*
-    (atree-insert *guest-tests* (quote name)
+    (atree-insert *guest-tests* (append suite-prefix (quote name))
                   (λ ()
                     (call/cc
                       (lambda (cont)
