@@ -28,7 +28,7 @@
                          msg
                          (car err)
                          (apply format #f (cadr err) (caddr err))))
-            (#t (format #f "~a: ~s"
+            (#t (format #f "~a: ~a"
                         (bold (foreground #:red "fail"))
                         msg)))))
 
