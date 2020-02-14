@@ -2,29 +2,71 @@
   #:use-module (guest atree)
   #:use-module (srfi srfi-1)
   #:export (define-test
+            define-suite
+            assert-equal?
+            assert
             run-guest
             run-guest-test))
 
 (define *guest-tests* '())
 
+(define test-cont '())
+(define suite-prefix '())
+
+
+(define (assert-equal-internal? left right mleft mright cl)
+ (unless (equal? left right)
+   (test-cont (cons #f (format #f (string-append
+                                   "Left: ~A -> ~A != Right ~A -> ~A~%"
+                                   "On line ~A of ~A~%")
+                               mleft left mright right
+                               (cdr (assoc 'line cl))
+                               (cdr (assoc 'filename cl)))))))
+
+(define (assert-internal val mval cl)
+ (unless val
+   (test-cont (cons #f (format #f (string-append
+                                   "~A -> ~A ~%"
+                                   "On line ~A of ~A~%")
+                               mval val
+                               (cdr (assoc 'line cl))
+                               (cdr (assoc 'filename cl)))))))
+
+(define-syntax-rule (assert-equal? left right)
+  (assert-equal-internal? left right 'left 'right (current-source-location)))
+
+(define-syntax-rule (assert exp)
+  (assert-internal exp 'exp (current-source-location)))
+
+(define-syntax-rule
+  (define-suite name rules* ...)
+  (let ((copy suite-prefix))
+    (set! suite-prefix (append suite-prefix (quote name)))
+    rules* ...
+    (set! suite-prefix copy)))
+
 (define-syntax-rule
   (define-test name tcase* ...)
   (set! *guest-tests*
-    (atree-insert *guest-tests* (quote name)
+    (atree-insert *guest-tests* (append suite-prefix (quote name))
                   (lambda ()
-                    (or (return-fail tcase*) ...)))))
+                    (call/cc
+                     (lambda (cont)
+                       ; this should be a parameterize, but that breaks in
+                       ; with-code-coverage for some reason.
+                       (set! test-cont cont)
+                       (return-fail tcase*) ...
+                       #f))))))
 
 (define-syntax-rule
   (return-fail tcase)
   (let ((errorm #f))
     (catch #t
       (lambda ()
-        (if tcase
-          #f
-          (cons #f (quote tcase))))
+        tcase)
       ; post-unwind handler
       (lambda (key . args)
-        (cons args (quote tcase))))))
+        (test-cont (cons args (quote tcase)))))))
 
 
 (define* (run-guest #:optional (printer null-printer))
