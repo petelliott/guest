@@ -37,7 +37,7 @@
   (define-test name tcase* ...)
   (set! *guest-tests*
     (atree-insert *guest-tests* (append suite-prefix (quote name))
-                  (λ ()
+                  (lambda ()
                     (call/cc
                       (lambda (cont)
                         (set! test-cont cont)
