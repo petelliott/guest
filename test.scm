@@ -39,10 +39,12 @@
     (atree-insert *guest-tests* (append suite-prefix (quote name))
                   (lambda ()
                     (call/cc
-                      (lambda (cont)
-                        (set! test-cont cont)
-                        (return-fail tcase*) ...
-                        #f))))))
+                     (lambda (cont)
+                       ; this should be a parameterize, but that breaks in
+                       ; with-code-coverage for some reason.
+                       (set! test-cont cont)
+                       (return-fail tcase*) ...
+                       #f))))))
 
 (define-syntax-rule
   (return-fail tcase)
