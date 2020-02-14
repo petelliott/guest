@@ -4,6 +4,7 @@
   #:export (define-test
             define-suite
             assert-equal?
+            assert
             run-guest
             run-guest-test))
 
@@ -21,17 +22,28 @@
                                mleft left mright right
                                (cdr (assoc 'line cl))
                                (cdr (assoc 'filename cl)))))))
+
+(define (assert-internal val mval cl)
+ (unless val
+   (test-cont (cons #f (format #f (string-append
+                                   "~A -> ~A ~%"
+                                   "On line ~A of ~A~%")
+                               mval val
+                               (cdr (assoc 'line cl))
+                               (cdr (assoc 'filename cl)))))))
+
+(define-syntax-rule (assert-equal? left right)
+  (assert-equal-internal? left right 'left 'right (current-source-location)))
+
+(define-syntax-rule (assert exp)
+  (assert-internal exp 'exp (current-source-location)))
+
 (define-syntax-rule
   (define-suite name rules* ...)
   (let ((copy suite-prefix))
     (set! suite-prefix (append suite-prefix (quote name)))
     rules* ...
     (set! suite-prefix copy)))
-
-
-(define-syntax-rule
-  (assert-equal? left right)
-  (assert-equal-internal? left right 'left 'right (current-source-location)))
 
 (define-syntax-rule
   (define-test name tcase* ...)
