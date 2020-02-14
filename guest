@@ -42,6 +42,10 @@
 (define tests (tokenize (assoc-ref args '())))
 (define cover-out (assoc-ref args 'cover-out))
 
+(define (realpath path)
+  (if (eqv? #\/ (string-ref path 0))
+      path (string-append (getcwd) "/" path)))
+
 (define (load-tests tests)
   (for-each
     (lambda (test)
@@ -49,7 +53,7 @@
         (lambda (filename statinfo flag)
           (when (and (eq? flag 'regular)
                      (string-match ".scm$" filename))
-            (load filename))
+            (load (realpath filename)))
           #t)))
     tests))
 
