@@ -20,17 +20,17 @@ put the following in a file named `test/test.scm` directory (or really anywhere)
 (use-modules (guest test))
 
 (define-test (a b c)
-  #t
-  (equal? 5 6)
-  #t)
+  (assert #t)
+  (assert-equal? 5 6)
+  (assert #t)
 
 (define-test (a b d)
-  #t
-  #t
-  #t)
+  (assert #t)
+  (assert #t)
+  (assert #t)
 
 (define-test (a b e)
-  #t
+  (assert #t)
   (car '()))
 ```
 
